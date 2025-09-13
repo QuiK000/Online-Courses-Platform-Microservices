@@ -69,7 +69,11 @@ public class JwtServiceImpl implements IJwtService {
         String username = claims.getSubject();
         String userId = claims.get(USER_ID).toString();
 
-        Map<String, Object> claimsForNewToken = Map.of(TOKEN_TYPE, "ACCESS_TOKEN", USER_ID, userId);
+        Map<String, Object> claimsForNewToken = Map.of(
+                TOKEN_TYPE, "ACCESS_TOKEN",
+                USER_ID, userId,
+                "roles", claims.get("roles")
+        );
         return buildToken(username, claimsForNewToken, accessTokenExpiration);
     }
 
