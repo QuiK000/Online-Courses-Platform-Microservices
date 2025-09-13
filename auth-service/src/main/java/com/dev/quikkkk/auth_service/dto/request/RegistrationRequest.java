@@ -21,6 +21,7 @@ public class RegistrationRequest {
 
     @NotBlank(message = "VALIDATION.REGISTRATION.EMAIL.NOT_BLANK")
     @Size(max = 50, message = "VALIDATION.REGISTRATION.EMAIL.SIZE")
+    @Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$", message = "VALIDATION.REGISTRATION.EMAIL.INVALID")
     private String email;
 
     @NotBlank(message = "VALIDATION.REGISTRATION.FIRST_NAME.NOT_BLANK")
