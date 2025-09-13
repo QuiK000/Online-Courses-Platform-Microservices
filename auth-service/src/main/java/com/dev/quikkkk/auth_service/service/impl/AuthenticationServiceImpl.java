@@ -108,6 +108,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
     @Override
     public UserResponse getUserById(String id) {
+        log.info("Getting user by id: {}", id);
         return userRepository
                 .findById(id)
                 .map(mapper::toUserResponse)
