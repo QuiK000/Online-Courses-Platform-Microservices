@@ -1,6 +1,7 @@
 package com.dev.quikkkk.auth_service.mapper;
 
 import com.dev.quikkkk.auth_service.dto.request.RegistrationRequest;
+import com.dev.quikkkk.auth_service.dto.response.UserResponse;
 import com.dev.quikkkk.auth_service.entity.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,19 @@ public class UserMapper {
                 .expired(false)
                 .emailVerified(false)
                 .roles(new HashSet<>())
+                .build();
+    }
+
+    public UserResponse toUserResponse(User user) {
+        return UserResponse
+                .builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .role(user.getRoles().iterator().next().getName())
+                .createdDate(user.getCreatedDate())
                 .build();
     }
 }
