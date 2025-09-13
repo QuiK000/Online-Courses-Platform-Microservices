@@ -5,10 +5,14 @@ import com.dev.quikkkk.auth_service.dto.request.RefreshTokenRequest;
 import com.dev.quikkkk.auth_service.dto.request.RegistrationRequest;
 import com.dev.quikkkk.auth_service.dto.response.ApiResponse;
 import com.dev.quikkkk.auth_service.dto.response.AuthenticationResponse;
+import com.dev.quikkkk.auth_service.dto.response.UserResponse;
+import com.dev.quikkkk.auth_service.security.UserPrincipal;
 import com.dev.quikkkk.auth_service.service.IAuthenticationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,5 +38,13 @@ public class AuthenticationController {
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<AuthenticationResponse>> refreshToken(@RequestBody RefreshTokenRequest request) {
         return ResponseEntity.ok(ApiResponse.success(service.refreshToken(request)));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser(
+            @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        if (principal == null) return ResponseEntity.badRequest().body(ApiResponse.error("User not found"));
+        return ResponseEntity.ok(ApiResponse.success(service.getUserById(principal.id())));
     }
 }
