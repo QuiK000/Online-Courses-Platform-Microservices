@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: course-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: course_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - network
+  redis:
+    image: redis:latest
+    container_name: course-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    networks:
+      - network
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: course-redis-insight
+    restart: unless-stopped
+    depends_on:
+      - redis
+    ports:
+      - "5540:5540"
+    volumes:
+      - redis-insight-data:/data
+    environment:
+      - RHI_REDIS_HOST=redis
+      - RHI_REDIS_PORT=6379
+    networks:
+      - network
+  mongodb:
+    image: mongo:latest
+    container_name: course-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_DATABASE: course_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - network
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - network
+    restart: unless-stopped
+  zipkin:
+    container_name: zipkin
+    image: openzipkin/zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - network
+
+volumes:
+  pgdata:
+  redis-insight-data:
+  pgadmin:
+  mongodb_data:
+    driver: local
+
+networks:
+  network:
+    driver: bridge
