@@ -62,6 +62,7 @@ public class UserController {
 
     @GetMapping
     @Operation(summary = "Get users by role")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<List<UserResponse>>> getUsersByRole(@RequestParam String role) {
         List<UserResponse> users = service.getUsersByRole(role);
         return ResponseEntity.ok(ApiResponse.success(users));
@@ -69,6 +70,7 @@ public class UserController {
 
     @PatchMapping
     @Operation(summary = "Update user profile")
+    @PreAuthorize("@userSecurityServiceImpl.canEditUser(#principal.id, authentication.principal.id) or hasRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<UserResponse>> updateUserProfile(
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestBody @Valid UpdateUserRequest request
@@ -82,6 +84,7 @@ public class UserController {
             description = "Delete user by their id",
             security = @SecurityRequirement(name = "bearerAuth")
     )
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable String id) {
         service.deleteUser(id);
         return ResponseEntity.ok(ApiResponse.success(null));
@@ -89,6 +92,7 @@ public class UserController {
 
     @GetMapping("/search")
     @Operation(summary = "Search users by name")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse<List<UserResponse>>> searchUsers(@RequestParam String name) {
         List<UserResponse> users = service.searchUsers(name);
         return ResponseEntity.ok(ApiResponse.success(users));
