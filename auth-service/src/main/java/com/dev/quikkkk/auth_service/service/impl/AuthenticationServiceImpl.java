@@ -1,17 +1,19 @@
 package com.dev.quikkkk.auth_service.service.impl;
 
+import com.dev.quikkkk.auth_service.client.IUserServiceClient;
+import com.dev.quikkkk.auth_service.dto.request.CreateUserRequest;
 import com.dev.quikkkk.auth_service.dto.request.LoginRequest;
 import com.dev.quikkkk.auth_service.dto.request.RefreshTokenRequest;
 import com.dev.quikkkk.auth_service.dto.request.RegistrationRequest;
 import com.dev.quikkkk.auth_service.dto.response.AuthenticationResponse;
 import com.dev.quikkkk.auth_service.dto.response.UserResponse;
 import com.dev.quikkkk.auth_service.entity.Role;
-import com.dev.quikkkk.auth_service.entity.User;
+import com.dev.quikkkk.auth_service.entity.UserCredentials;
 import com.dev.quikkkk.auth_service.exception.BusinessException;
 import com.dev.quikkkk.auth_service.exception.ErrorCode;
 import com.dev.quikkkk.auth_service.mapper.UserMapper;
 import com.dev.quikkkk.auth_service.repository.IRoleRepository;
-import com.dev.quikkkk.auth_service.repository.IUserRepository;
+import com.dev.quikkkk.auth_service.repository.IUserCredentialsRepository;
 import com.dev.quikkkk.auth_service.service.IAuthenticationService;
 import com.dev.quikkkk.auth_service.service.IJwtService;
 import jakarta.persistence.EntityNotFoundException;
@@ -38,7 +40,8 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
     private final AuthenticationManager authenticationManager;
     private final IJwtService jwtService;
-    private final IUserRepository userRepository;
+    private final IUserCredentialsRepository userRepository;
+    private final IUserServiceClient userServiceClient;
     private final IRoleRepository roleRepository;
     private final UserMapper mapper;
 
@@ -52,12 +55,12 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 )
         );
 
-        User user = userRepository
+        UserCredentials userCredentials = userRepository
                 .findByUsernameIgnoreCase(request.getUsername())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        String token = jwtService.generateAccessToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
+        String token = jwtService.generateAccessToken(userCredentials);
+        String refreshToken = jwtService.generateRefreshToken(userCredentials);
 
         log.info("Login response: {}", token);
         return AuthenticationResponse
@@ -95,24 +98,47 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         Set<Role> roles = new HashSet<>();
         roles.add(defaultRole);
 
-        User user = mapper.toUser(request);
-        user.setRoles(roles);
+        UserCredentials userCredentials = mapper.toUser(request);
+        userCredentials.setRoles(roles);
 
-        log.debug("Saving user: {}", user);
-        userRepository.save(user);
-        log.info("User {} registered", user.getUsername());
+        log.debug("Saving user: {}", userCredentials);
+        userRepository.save(userCredentials);
+        log.info("User {} registered", userCredentials.getUsername());
 
-        defaultRole.getUsers().add(user);
+        defaultRole.getUserCredentials().add(userCredentials);
         roleRepository.save(defaultRole);
+
+        try {
+            CreateUserRequest userRequest = CreateUserRequest
+                    .builder()
+                    .id(userCredentials.getId())
+                    .username(userCredentials.getUsername())
+                    .email(userCredentials.getEmail())
+                    .firstName(userCredentials.getFirstName())
+                    .lastName(userCredentials.getLastName())
+                    .role(userCredentials.getRoles().iterator().next().getName())
+                    .build();
+
+            userServiceClient.createUser(userRequest);
+            log.info("User profile created in User Service");
+        } catch (Exception e) {
+            log.warn("Failed to create user profile in User Service: {}", e.getMessage());
+        }
     }
 
     @Override
     public UserResponse getUserById(String id) {
-        log.info("Getting user by id: {}", id);
-        return userRepository
-                .findById(id)
-                .map(mapper::toUserResponse)
-                .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+        try {
+            UserResponse userFromService = userServiceClient.getUserById(id);
+            log.info("User data retrieved from User Service: {}", userFromService);
+            return userFromService;
+        } catch (Exception e) {
+            log.warn("Failed to get user from User Service, falling back to Auth Service: {}", e.getMessage());
+            return userRepository
+                    .findById(id)
+                    .map(mapper::toUserResponse)
+                    .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+        }
     }
 
     private void checkUserEmail(String email) {
