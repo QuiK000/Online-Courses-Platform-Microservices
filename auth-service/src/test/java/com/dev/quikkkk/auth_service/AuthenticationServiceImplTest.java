@@ -5,12 +5,12 @@ import com.dev.quikkkk.auth_service.dto.request.RefreshTokenRequest;
 import com.dev.quikkkk.auth_service.dto.request.RegistrationRequest;
 import com.dev.quikkkk.auth_service.dto.response.AuthenticationResponse;
 import com.dev.quikkkk.auth_service.entity.Role;
-import com.dev.quikkkk.auth_service.entity.User;
+import com.dev.quikkkk.auth_service.entity.UserCredentials;
 import com.dev.quikkkk.auth_service.exception.BusinessException;
 import com.dev.quikkkk.auth_service.exception.ErrorCode;
 import com.dev.quikkkk.auth_service.mapper.UserMapper;
 import com.dev.quikkkk.auth_service.repository.IRoleRepository;
-import com.dev.quikkkk.auth_service.repository.IUserRepository;
+import com.dev.quikkkk.auth_service.repository.IUserCredentialsRepository;
 import com.dev.quikkkk.auth_service.service.IJwtService;
 import com.dev.quikkkk.auth_service.service.impl.AuthenticationServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +47,7 @@ class AuthenticationServiceImplTest {
     private IJwtService jwtService;
 
     @Mock
-    private IUserRepository userRepository;
+    private IUserCredentialsRepository userRepository;
 
     @Mock
     private IRoleRepository roleRepository;
@@ -58,7 +58,7 @@ class AuthenticationServiceImplTest {
     @InjectMocks
     private AuthenticationServiceImpl authenticationService;
 
-    private User testUser;
+    private UserCredentials testUserCredentials;
     private Role studentRole;
     private LoginRequest loginRequest;
     private RegistrationRequest registrationRequest;
@@ -68,10 +68,10 @@ class AuthenticationServiceImplTest {
         studentRole = Role.builder()
                 .id("role-id")
                 .name("ROLE_STUDENT")
-                .users(new HashSet<>())
+                .userCredentials(new HashSet<>())
                 .build();
 
-        testUser = User.builder()
+        testUserCredentials = UserCredentials.builder()
                 .id("user-id")
                 .username("testuser")
                 .email("test@example.com")
@@ -105,9 +105,9 @@ class AuthenticationServiceImplTest {
     void shouldLoginSuccessfully() {
         // Given
         when(userRepository.findByUsernameIgnoreCase(loginRequest.getUsername()))
-                .thenReturn(Optional.of(testUser));
-        when(jwtService.generateAccessToken(testUser)).thenReturn("access-token");
-        when(jwtService.generateRefreshToken(testUser)).thenReturn("refresh-token");
+                .thenReturn(Optional.of(testUserCredentials));
+        when(jwtService.generateAccessToken(testUserCredentials)).thenReturn("access-token");
+        when(jwtService.generateRefreshToken(testUserCredentials)).thenReturn("refresh-token");
 
         // When
         AuthenticationResponse response = authenticationService.login(loginRequest);
@@ -119,8 +119,8 @@ class AuthenticationServiceImplTest {
 
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verify(userRepository).findByUsernameIgnoreCase(loginRequest.getUsername());
-        verify(jwtService).generateAccessToken(testUser);
-        verify(jwtService).generateRefreshToken(testUser);
+        verify(jwtService).generateAccessToken(testUserCredentials);
+        verify(jwtService).generateRefreshToken(testUserCredentials);
     }
 
     @Test
@@ -182,7 +182,7 @@ class AuthenticationServiceImplTest {
                 .thenReturn(false);
         when(roleRepository.findByName("ROLE_STUDENT"))
                 .thenReturn(Optional.of(studentRole));
-        when(mapper.toUser(registrationRequest)).thenReturn(testUser);
+        when(mapper.toUser(registrationRequest)).thenReturn(testUserCredentials);
 
         // When
         authenticationService.register(registrationRequest);
@@ -192,7 +192,7 @@ class AuthenticationServiceImplTest {
         verify(userRepository).existsByEmailIgnoreCase(registrationRequest.getEmail());
         verify(roleRepository).findByName("ROLE_STUDENT");
         verify(mapper).toUser(registrationRequest);
-        verify(userRepository).save(testUser);
+        verify(userRepository).save(testUserCredentials);
         verify(roleRepository).save(studentRole);
     }
 
