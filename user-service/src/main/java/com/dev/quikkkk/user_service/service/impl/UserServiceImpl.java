@@ -1,8 +1,11 @@
 package com.dev.quikkkk.user_service.service.impl;
 
 import com.dev.quikkkk.user_service.dto.request.CreateUserRequest;
+import com.dev.quikkkk.user_service.dto.request.UpdateUserRequest;
 import com.dev.quikkkk.user_service.dto.response.UserResponse;
 import com.dev.quikkkk.user_service.entity.User;
+import com.dev.quikkkk.user_service.exception.BusinessException;
+import com.dev.quikkkk.user_service.exception.ErrorCode;
 import com.dev.quikkkk.user_service.mapper.UserMapper;
 import com.dev.quikkkk.user_service.repository.IUserRepository;
 import com.dev.quikkkk.user_service.service.IUserService;
@@ -10,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,7 +45,7 @@ public class UserServiceImpl implements IUserService {
         return repository
                 .findById(id)
                 .map(mapper::toUserResponse)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
     @Override
@@ -53,6 +57,22 @@ public class UserServiceImpl implements IUserService {
                 .stream()
                 .map(mapper::toUserResponse)
                 .toList();
+    }
+
+    @Override
+    @Caching(evict = {
+            @CacheEvict(value = "userById", key = "#id"),
+            @CacheEvict(value = "usersByRole", allEntries = true),
+            @CacheEvict(value = "userSearch", allEntries = true)
+    })
+    public UserResponse updateUser(String id, UpdateUserRequest request) {
+        log.info("Updating user by id: {}", id);
+
+        User user = repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        mapper.mergeUser(user, request);
+
+        User updatedUser = repository.save(user);
+        return mapper.toUserResponse(updatedUser);
     }
 
     @Override

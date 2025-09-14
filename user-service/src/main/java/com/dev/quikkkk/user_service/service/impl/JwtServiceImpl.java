@@ -1,5 +1,7 @@
 package com.dev.quikkkk.user_service.service.impl;
 
+import com.dev.quikkkk.user_service.exception.BusinessException;
+import com.dev.quikkkk.user_service.exception.ErrorCode;
 import com.dev.quikkkk.user_service.service.IJwtService;
 import com.dev.quikkkk.user_service.utils.KeyUtils;
 import io.jsonwebtoken.Claims;
@@ -53,7 +55,7 @@ public class JwtServiceImpl implements IJwtService {
                     .parseSignedClaims(token)
                     .getPayload();
         } catch (JwtException e) {
-            throw new RuntimeException("Invalid JWT Token", e);
+            throw new BusinessException(ErrorCode.INVALID_JWT_TOKEN);
         }
     }
 
