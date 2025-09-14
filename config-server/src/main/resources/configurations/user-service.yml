@@ -29,5 +29,9 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka/
 
+app:
+  config:
+    auth-service-url: http://localhost:8222/internal/auth
+
 server:
   port: 8070
