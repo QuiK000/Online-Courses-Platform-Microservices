@@ -8,6 +8,8 @@ import com.dev.quikkkk.user_service.repository.IUserRepository;
 import com.dev.quikkkk.user_service.service.IUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +22,9 @@ public class UserServiceImpl implements IUserService {
     private final IUserRepository repository;
 
     @Override
+    @CacheEvict(value = {
+            "userById", "usersByRole", "userSearch"
+    }, allEntries = true)
     public void createUser(CreateUserRequest request) {
         log.info("Create user request: {}", request);
 
@@ -30,6 +35,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    @Cacheable(value = "userById", key = "#id")
     public UserResponse getUserById(String id) {
         log.info("Getting user by id: {}", id);
         return repository
@@ -39,6 +45,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    @Cacheable(value = "usersByRole", key = "#role")
     public List<UserResponse> getUsersByRole(String role) {
         log.info("Getting users by role: {}", role);
         return repository
@@ -49,13 +56,18 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    @CacheEvict(value = {
+            "userById", "usersByRole", "userSearch"
+    }, allEntries = true)
     public void deleteUser(String id) {
         log.info("Deleting user by id: {}", id);
         repository.deleteById(id);
     }
 
     @Override
+    @Cacheable(value = "userSearch", key = "#name")
     public List<UserResponse> searchUsers(String name) {
+        log.info("Searching users by name: {}", name);
         return repository
                 .findByUsernameContaining(name)
                 .stream()
