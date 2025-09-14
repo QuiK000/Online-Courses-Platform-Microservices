@@ -1,7 +1,7 @@
 package com.dev.quikkkk.auth_service.service.impl;
 
 import com.dev.quikkkk.auth_service.entity.Role;
-import com.dev.quikkkk.auth_service.entity.User;
+import com.dev.quikkkk.auth_service.entity.UserCredentials;
 import com.dev.quikkkk.auth_service.service.IJwtService;
 import com.dev.quikkkk.auth_service.utils.KeyUtils;
 import io.jsonwebtoken.Claims;
@@ -38,25 +38,25 @@ public class JwtServiceImpl implements IJwtService {
     }
 
     @Override
-    public String generateAccessToken(User user) {
+    public String generateAccessToken(UserCredentials userCredentials) {
         Map<String, Object> claims = Map.of(
                 TOKEN_TYPE, "ACCESS_TOKEN",
-                USER_ID, user.getId(),
-                "roles", user.getRoles().stream().map(Role::getName).toList()
+                USER_ID, userCredentials.getId(),
+                "roles", userCredentials.getRoles().stream().map(Role::getName).toList()
         );
 
-        return buildToken(user.getUsername(), claims, accessTokenExpiration);
+        return buildToken(userCredentials.getUsername(), claims, accessTokenExpiration);
     }
 
     @Override
-    public String generateRefreshToken(User user) {
+    public String generateRefreshToken(UserCredentials userCredentials) {
         Map<String, Object> claims = Map.of(
                 TOKEN_TYPE, "REFRESH_TOKEN",
-                USER_ID, user.getId(),
-                "roles", user.getRoles().stream().map(Role::getName).toList()
+                USER_ID, userCredentials.getId(),
+                "roles", userCredentials.getRoles().stream().map(Role::getName).toList()
         );
 
-        return buildToken(user.getUsername(), claims, refreshTokenExpiration);
+        return buildToken(userCredentials.getUsername(), claims, refreshTokenExpiration);
     }
 
     @Override

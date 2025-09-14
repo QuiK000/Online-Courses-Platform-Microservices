@@ -1,13 +1,13 @@
 package com.dev.quikkkk.auth_service.service;
 
-import com.dev.quikkkk.auth_service.entity.User;
+import com.dev.quikkkk.auth_service.entity.UserCredentials;
 
 import java.util.List;
 
 public interface IJwtService {
-    String generateAccessToken(User user);
+    String generateAccessToken(UserCredentials userCredentials);
 
-    String generateRefreshToken(User user);
+    String generateRefreshToken(UserCredentials userCredentials);
 
     String refreshAccessToken(String refreshToken);
 

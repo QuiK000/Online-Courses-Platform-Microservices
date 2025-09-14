@@ -1,7 +1,7 @@
 package com.dev.quikkkk.auth_service;
 
 import com.dev.quikkkk.auth_service.dto.request.RegistrationRequest;
-import com.dev.quikkkk.auth_service.entity.User;
+import com.dev.quikkkk.auth_service.entity.UserCredentials;
 import com.dev.quikkkk.auth_service.mapper.UserMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("User Mapper Tests")
-class UserMapperTest {
+class UserCredentialsMapperTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -45,18 +45,18 @@ class UserMapperTest {
         when(passwordEncoder.encode("Password123!")).thenReturn("encodedPassword");
 
         // When
-        User user = userMapper.toUser(registrationRequest);
+        UserCredentials userCredentials = userMapper.toUser(registrationRequest);
 
         // Then
-        assertThat(user.getUsername()).isEqualTo("testuser");
-        assertThat(user.getEmail()).isEqualTo("test@example.com");
-        assertThat(user.getFirstName()).isEqualTo("Test");
-        assertThat(user.getLastName()).isEqualTo("User");
-        assertThat(user.getPassword()).isEqualTo("encodedPassword");
-        assertThat(user.isEnabled()).isTrue();
-        assertThat(user.isLocked()).isFalse();
-        assertThat(user.isExpired()).isFalse();
-        assertThat(user.isEmailVerified()).isFalse();
-        assertThat(user.getRoles()).isEmpty();
+        assertThat(userCredentials.getUsername()).isEqualTo("testuser");
+        assertThat(userCredentials.getEmail()).isEqualTo("test@example.com");
+        assertThat(userCredentials.getFirstName()).isEqualTo("Test");
+        assertThat(userCredentials.getLastName()).isEqualTo("User");
+        assertThat(userCredentials.getPassword()).isEqualTo("encodedPassword");
+        assertThat(userCredentials.isEnabled()).isTrue();
+        assertThat(userCredentials.isLocked()).isFalse();
+        assertThat(userCredentials.isExpired()).isFalse();
+        assertThat(userCredentials.isEmailVerified()).isFalse();
+        assertThat(userCredentials.getRoles()).isEmpty();
     }
 }

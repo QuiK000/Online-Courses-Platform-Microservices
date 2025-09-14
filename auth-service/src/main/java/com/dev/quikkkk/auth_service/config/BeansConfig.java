@@ -1,6 +1,6 @@
 package com.dev.quikkkk.auth_service.config;
 
-import com.dev.quikkkk.auth_service.repository.IUserRepository;
+import com.dev.quikkkk.auth_service.repository.IUserCredentialsRepository;
 import com.dev.quikkkk.auth_service.security.ApplicationAuditorAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +24,7 @@ public class BeansConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(IUserRepository repository) {
+    public UserDetailsService userDetailsService(IUserCredentialsRepository repository) {
         return username -> repository
                 .findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));

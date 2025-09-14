@@ -36,9 +36,9 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "users")
+@Table(name = "user_credentials")
 @EntityListeners(AuditingEntityListener.class)
-public class User implements UserDetails {
+public class UserCredentials implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false)

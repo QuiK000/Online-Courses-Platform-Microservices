@@ -2,7 +2,7 @@ package com.dev.quikkkk.auth_service.mapper;
 
 import com.dev.quikkkk.auth_service.dto.request.RegistrationRequest;
 import com.dev.quikkkk.auth_service.dto.response.UserResponse;
-import com.dev.quikkkk.auth_service.entity.User;
+import com.dev.quikkkk.auth_service.entity.UserCredentials;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +16,8 @@ public class UserMapper {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User toUser(RegistrationRequest request) {
-        return User
+    public UserCredentials toUser(RegistrationRequest request) {
+        return UserCredentials
                 .builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
@@ -32,16 +32,15 @@ public class UserMapper {
                 .build();
     }
 
-    public UserResponse toUserResponse(User user) {
+    public UserResponse toUserResponse(UserCredentials userCredentials) {
         return UserResponse
                 .builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .role(user.getRoles().iterator().next().getName())
-                .createdDate(user.getCreatedDate())
+                .id(userCredentials.getId())
+                .username(userCredentials.getUsername())
+                .email(userCredentials.getEmail())
+                .firstName(userCredentials.getFirstName())
+                .lastName(userCredentials.getLastName())
+                .role(userCredentials.getRoles().iterator().next().getName())
                 .build();
     }
 }
