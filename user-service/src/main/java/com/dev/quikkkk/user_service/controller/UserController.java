@@ -4,6 +4,10 @@ import com.dev.quikkkk.user_service.dto.response.ApiResponse;
 import com.dev.quikkkk.user_service.dto.response.UserResponse;
 import com.dev.quikkkk.user_service.security.UserPrincipal;
 import com.dev.quikkkk.user_service.service.IUserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,16 +24,31 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
+@Tag(name = "Users", description = "API for management user")
 public class UserController {
     private final IUserService service;
 
     @GetMapping("/{id}")
+    @Operation(
+            summary = "Get user by id",
+            description = "Return information about the user by their id"
+    )
     @PreAuthorize("@userSecurityServiceImpl.canAccessUser(#id, authentication.principal.id) or hasRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable String id) {
         return ResponseEntity.ok(ApiResponse.success(service.getUserById(id)));
     }
 
     @GetMapping("/me")
+    @Operation(
+            summary = "Get current user",
+            description = "Return information about authorization user",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden"),
+    })
     public ResponseEntity<ApiResponse<UserResponse>> getMyProfile(
             @AuthenticationPrincipal UserPrincipal principal
     ) {
@@ -38,18 +57,25 @@ public class UserController {
     }
 
     @GetMapping
+    @Operation(summary = "Get users by role")
     public ResponseEntity<ApiResponse<List<UserResponse>>> getUsersByRole(@RequestParam String role) {
         List<UserResponse> users = service.getUsersByRole(role);
         return ResponseEntity.ok(ApiResponse.success(users));
     }
 
     @DeleteMapping("/{id}")
+    @Operation(
+            summary = "Delete user",
+            description = "Delete user by their id",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable String id) {
         service.deleteUser(id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     @GetMapping("/search")
+    @Operation(summary = "Search users by name")
     public ResponseEntity<ApiResponse<List<UserResponse>>> searchUsers(@RequestParam String name) {
         List<UserResponse> users = service.searchUsers(name);
         return ResponseEntity.ok(ApiResponse.success(users));
