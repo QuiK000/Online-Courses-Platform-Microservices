@@ -14,4 +14,6 @@ public interface IAuthenticationService {
     void register(RegistrationRequest request);
 
     UserResponse getUserById(String id);
+
+    void deleteUser(String id);
 }

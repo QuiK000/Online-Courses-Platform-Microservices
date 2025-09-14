@@ -141,6 +141,13 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         }
     }
 
+    @Override
+    public void deleteUser(String id) {
+        log.info("Deleting user with id: {}", id);
+        userServiceClient.deleteUser(id);
+        userRepository.deleteById(id);
+    }
+
     private void checkUserEmail(String email) {
         boolean emailExists = userRepository.existsByEmailIgnoreCase(email);
         if (emailExists) throw new BusinessException(EMAIL_ALREADY_EXISTS);

@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,7 +45,20 @@ public class AuthenticationController {
     public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser(
             @AuthenticationPrincipal UserPrincipal principal
     ) {
-        if (principal == null) return ResponseEntity.badRequest().body(ApiResponse.error("User not found"));
+        checkUserPrincipal(principal);
         return ResponseEntity.ok(ApiResponse.success(service.getUserById(principal.id())));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<Void>> deleteUser(
+            @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        checkUserPrincipal(principal);
+        service.deleteUser(principal.id());
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    private void checkUserPrincipal(UserPrincipal principal) {
+        if (principal == null) ResponseEntity.badRequest().body(ApiResponse.error("User not found"));
     }
 }
