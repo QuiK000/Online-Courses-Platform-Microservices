@@ -10,12 +10,13 @@ import com.dev.quikkkk.auth_service.dto.response.UserResponse;
 import com.dev.quikkkk.auth_service.entity.Role;
 import com.dev.quikkkk.auth_service.entity.UserCredentials;
 import com.dev.quikkkk.auth_service.exception.BusinessException;
-import com.dev.quikkkk.auth_service.exception.ErrorCode;
 import com.dev.quikkkk.auth_service.mapper.UserMapper;
 import com.dev.quikkkk.auth_service.repository.IRoleRepository;
 import com.dev.quikkkk.auth_service.repository.IUserCredentialsRepository;
 import com.dev.quikkkk.auth_service.service.IAuthenticationService;
+import com.dev.quikkkk.auth_service.service.IBruteForceProtectionService;
 import com.dev.quikkkk.auth_service.service.IJwtService;
+import com.dev.quikkkk.auth_service.utils.NetworkUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static com.dev.quikkkk.auth_service.exception.ErrorCode.EMAIL_ALREADY_EXISTS;
+import static com.dev.quikkkk.auth_service.exception.ErrorCode.INTERNAL_SERVER_ERROR;
+import static com.dev.quikkkk.auth_service.exception.ErrorCode.INVALID_CREDENTIALS;
 import static com.dev.quikkkk.auth_service.exception.ErrorCode.PASSWORD_MISMATCH;
+import static com.dev.quikkkk.auth_service.exception.ErrorCode.TOO_MANY_ATTEMPTS;
 import static com.dev.quikkkk.auth_service.exception.ErrorCode.USERNAME_ALREADY_EXISTS;
 import static com.dev.quikkkk.auth_service.exception.ErrorCode.USER_NOT_FOUND;
 
@@ -41,6 +45,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final IJwtService jwtService;
     private final IUserCredentialsRepository userRepository;
+    private final IBruteForceProtectionService bruteForceProtectionService;
     private final IUserServiceClient userServiceClient;
     private final IRoleRepository roleRepository;
     private final UserMapper mapper;
@@ -48,27 +53,45 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     @Override
     public AuthenticationResponse login(LoginRequest request) {
         log.info("Login request: {}", request);
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
-                )
-        );
+        String clientIp = NetworkUtils.getClientIp().orElseThrow(() -> new BusinessException(INTERNAL_SERVER_ERROR));
 
-        UserCredentials userCredentials = userRepository
-                .findByUsernameIgnoreCase(request.getUsername())
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        if (bruteForceProtectionService.isBlocked(clientIp)) throw new BusinessException(TOO_MANY_ATTEMPTS);
 
-        String token = jwtService.generateAccessToken(userCredentials);
-        String refreshToken = jwtService.generateRefreshToken(userCredentials);
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword()
+                    )
+            );
 
-        log.info("Login response: {}", token);
-        return AuthenticationResponse
-                .builder()
-                .accessToken(token)
-                .refreshToken(refreshToken)
-                .tokenType(TOKEN_TYPE)
-                .build();
+            bruteForceProtectionService.registerSuccessfulAttempt(clientIp);
+
+            UserCredentials userCredentials = userRepository
+                    .findByUsernameIgnoreCase(request.getUsername())
+                    .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+
+            String token = jwtService.generateAccessToken(userCredentials);
+            String refreshToken = jwtService.generateRefreshToken(userCredentials);
+
+            log.info("Login response: {}", token);
+            return AuthenticationResponse
+                    .builder()
+                    .accessToken(token)
+                    .refreshToken(refreshToken)
+                    .tokenType(TOKEN_TYPE)
+                    .build();
+        } catch (Exception e) {
+            bruteForceProtectionService.registerFailedAttempt(clientIp);
+            int remainingAttempts = bruteForceProtectionService.getRemainingAttempts(clientIp);
+
+            log.warn(
+                    "Failed login attempt for user: {} from IP: {}. Remaining attempts: {}",
+                    request.getUsername(), clientIp, remainingAttempts
+            );
+
+            throw new BusinessException(INVALID_CREDENTIALS);
+        }
     }
 
     @Override
