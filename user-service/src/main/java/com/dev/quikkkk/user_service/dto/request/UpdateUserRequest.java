@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.validator.constraints.URL;
 
 @Getter
 @Setter
@@ -34,5 +35,7 @@ public class UpdateUserRequest {
 
     @Pattern(regexp = "^(\\+\\d{1,3}[- ]?)?\\(?\\d{3}\\)?[- ]?\\d{3}[- ]?\\d{4}$", message = "VALIDATION.UPDATE_USER.PHONE.BAD.VALIDATION")
     private String phone;
+
+    @URL(message = "VALIDATION.UPDATE_USER.IMAGE_URL.FORMAT")
     private String profilePicture;
 }
