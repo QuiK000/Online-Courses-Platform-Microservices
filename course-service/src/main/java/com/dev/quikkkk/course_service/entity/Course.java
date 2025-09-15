@@ -25,4 +25,7 @@ public class Course extends BaseEntity {
 
     @Column(name = "teacher_id", nullable = false)
     private String teacherId;
+
+    @Column(name = "image_url", nullable = false)
+    private String imageUrl;
 }
