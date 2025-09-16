@@ -1,9 +1,9 @@
 package com.dev.quikkkk.course_service.entity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,29 +11,30 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
-@Table(name = "courses")
+@Table(name = "lessons")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class Course extends BaseEntity {
+public class Lesson extends BaseEntity {
+    @ManyToOne
+    @JoinColumn(name = "course_id")
+    private Course course;
+
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "description", nullable = false)
-    private String description;
-
-    @Column(name = "teacher_id", nullable = false)
-    private String teacherId;
+    @Column(name = "content", nullable = false)
+    private String content;
 
     @Column(name = "image_url", nullable = false)
     private String imageUrl;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Lesson> lessons = new ArrayList<>();
+    @Column(name = "video_url", nullable = false)
+    private String videoUrl;
+
+    @Column(name = "lesson_order")
+    private Integer order;
 }
