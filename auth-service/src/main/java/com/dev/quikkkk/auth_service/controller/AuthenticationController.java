@@ -3,6 +3,7 @@ package com.dev.quikkkk.auth_service.controller;
 import com.dev.quikkkk.auth_service.dto.request.LoginRequest;
 import com.dev.quikkkk.auth_service.dto.request.RefreshTokenRequest;
 import com.dev.quikkkk.auth_service.dto.request.RegistrationRequest;
+import com.dev.quikkkk.auth_service.dto.request.UpdateRoleRequest;
 import com.dev.quikkkk.auth_service.dto.response.ApiResponse;
 import com.dev.quikkkk.auth_service.dto.response.AuthenticationResponse;
 import com.dev.quikkkk.auth_service.dto.response.UserResponse;
@@ -14,7 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,6 +50,15 @@ public class AuthenticationController {
     ) {
         checkUserPrincipal(principal);
         return ResponseEntity.ok(ApiResponse.success(service.getUserById(principal.id())));
+    }
+
+    @PutMapping("/users/{userId}/role")
+    public ResponseEntity<Void> updateUserRole(
+            @PathVariable String userId,
+            @RequestBody UpdateRoleRequest request
+    ) {
+        service.updateUserRole(userId, request);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping

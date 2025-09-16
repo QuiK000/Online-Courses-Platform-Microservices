@@ -5,6 +5,7 @@ import com.dev.quikkkk.auth_service.dto.request.CreateUserRequest;
 import com.dev.quikkkk.auth_service.dto.request.LoginRequest;
 import com.dev.quikkkk.auth_service.dto.request.RefreshTokenRequest;
 import com.dev.quikkkk.auth_service.dto.request.RegistrationRequest;
+import com.dev.quikkkk.auth_service.dto.request.UpdateRoleRequest;
 import com.dev.quikkkk.auth_service.dto.response.AuthenticationResponse;
 import com.dev.quikkkk.auth_service.dto.response.UserResponse;
 import com.dev.quikkkk.auth_service.entity.Role;
@@ -26,12 +27,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.dev.quikkkk.auth_service.exception.ErrorCode.EMAIL_ALREADY_EXISTS;
 import static com.dev.quikkkk.auth_service.exception.ErrorCode.INTERNAL_SERVER_ERROR;
 import static com.dev.quikkkk.auth_service.exception.ErrorCode.INVALID_CREDENTIALS;
 import static com.dev.quikkkk.auth_service.exception.ErrorCode.PASSWORD_MISMATCH;
+import static com.dev.quikkkk.auth_service.exception.ErrorCode.ROLE_NOT_FOUND;
 import static com.dev.quikkkk.auth_service.exception.ErrorCode.TOO_MANY_ATTEMPTS;
 import static com.dev.quikkkk.auth_service.exception.ErrorCode.USERNAME_ALREADY_EXISTS;
 import static com.dev.quikkkk.auth_service.exception.ErrorCode.USER_NOT_FOUND;
@@ -162,6 +165,36 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                     .map(mapper::toUserResponse)
                     .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
         }
+    }
+
+    @Override
+    @Transactional
+    public void updateUserRole(String userId, UpdateRoleRequest request) {
+        log.info("Updating user role for user with id: {} to role: {}", userId, request.getRole());
+
+        UserCredentials user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+
+        Role targetRole = roleRepository.findByName(request.getRole())
+                .orElseThrow(() -> new BusinessException(ROLE_NOT_FOUND));
+
+        Optional<Role> currentRole = user.getRoles().stream().findFirst();
+
+        if (currentRole.isPresent() && currentRole.get().getName().equals(request.getRole())) {
+            log.warn("User {} already has role {}", userId, request.getRole());
+            return;
+        }
+
+        user.getRoles().clear();
+        user.getRoles().add(targetRole);
+
+        userRepository.save(user);
+
+        log.info("User role updated from {} to {} for user ID: {}",
+                currentRole.map(Role::getName).orElse("NONE"),
+                request.getRole(),
+                userId
+        );
     }
 
     @Override
