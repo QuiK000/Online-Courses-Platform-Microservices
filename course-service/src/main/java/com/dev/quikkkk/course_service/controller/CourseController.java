@@ -1,10 +1,13 @@
 package com.dev.quikkkk.course_service.controller;
 
 import com.dev.quikkkk.course_service.dto.request.CreateCourseRequest;
+import com.dev.quikkkk.course_service.dto.request.CreateLessonRequest;
 import com.dev.quikkkk.course_service.dto.response.ApiResponse;
 import com.dev.quikkkk.course_service.dto.response.CourseResponse;
+import com.dev.quikkkk.course_service.dto.response.LessonResponse;
 import com.dev.quikkkk.course_service.security.UserPrincipal;
 import com.dev.quikkkk.course_service.service.ICourseService;
+import com.dev.quikkkk.course_service.service.ILessonService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +27,8 @@ import java.util.List;
 @RequestMapping("/api/v1/courses")
 @RequiredArgsConstructor
 public class CourseController {
-    private final ICourseService service;
+    private final ICourseService courseService;
+    private final ILessonService lessonService;
 
     @PostMapping
     @PreAuthorize("hasRole('ROLE_TEACHER')")
@@ -33,18 +37,27 @@ public class CourseController {
             @AuthenticationPrincipal UserPrincipal principal
     ) {
         var teacherId = principal.id();
-        service.createCourse(request, teacherId);
+        courseService.createCourse(request, teacherId);
         return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @PostMapping("/{id}/lessons")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    public ResponseEntity<ApiResponse<LessonResponse>> createLesson(
+            @RequestBody @Valid CreateLessonRequest request,
+            @PathVariable String id
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(lessonService.saveLesson(id, request)));
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<CourseResponse>>> getAllCourses() {
-        return ResponseEntity.ok(ApiResponse.success(service.getAllCourses()));
+        return ResponseEntity.ok(ApiResponse.success(courseService.getAllCourses()));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteCourse(@PathVariable String id) {
-        service.deleteCourse(id);
+        courseService.deleteCourse(id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 }
