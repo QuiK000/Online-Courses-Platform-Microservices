@@ -26,6 +26,7 @@ public class RedisConfig {
     @Bean
     public RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
         return builder -> builder
-                .withCacheConfiguration("courses", redisCacheConfiguration());
+                .withCacheConfiguration("courses", redisCacheConfiguration())
+                .withCacheConfiguration("lessons", redisCacheConfiguration());
     }
 }
