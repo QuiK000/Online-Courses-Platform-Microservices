@@ -12,7 +12,8 @@ public enum ErrorCode {
     FORBIDDEN("FORBIDDEN", "Forbidden", HttpStatus.FORBIDDEN),
     UNAUTHORIZED("UNAUTHORIZED", "Unauthorized", HttpStatus.UNAUTHORIZED),
     INVALID_JWT_TOKEN("INVALID_JWT_TOKEN", "Invalid JWT token", HttpStatus.UNAUTHORIZED),
-    COURSE_NOT_FOUND("COURSE_NOT_FOUND", "Course not found with id %s" , HttpStatus.NOT_FOUND ),;
+    COURSE_NOT_FOUND("COURSE_NOT_FOUND", "Course not found with id %s" , HttpStatus.NOT_FOUND ),
+    LESSON_NOT_FOUND("LESSON_NOT_FOUND", "Lesson not found with id %s" , HttpStatus.NOT_FOUND ), ;
 
     private final String code;
     private final String defaultMessage;
