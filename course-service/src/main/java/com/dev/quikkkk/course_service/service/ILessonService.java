@@ -12,5 +12,5 @@ public interface ILessonService {
 
     LessonResponse getLessonById(String lessonId);
 
-    void deleteLessonById(String lessonId);
+    void deleteLesson(String lessonId, String courseId);
 }
