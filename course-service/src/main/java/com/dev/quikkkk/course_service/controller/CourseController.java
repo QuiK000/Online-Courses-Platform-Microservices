@@ -63,6 +63,23 @@ public class CourseController {
         return ResponseEntity.ok(ApiResponse.success(courseService.getCourseWithLessons(id)));
     }
 
+    @GetMapping("/{courseId}/lessons")
+    public ResponseEntity<ApiResponse<List<LessonResponse>>> getLessonsByCourseId(@PathVariable String courseId) {
+        return ResponseEntity.ok(ApiResponse.success(lessonService.getLessonsByCourseId(courseId)));
+    }
+
+    @GetMapping("/lessons/{lessonId}")
+    public ResponseEntity<ApiResponse<LessonResponse>> getLessonById(@PathVariable String lessonId) {
+        return ResponseEntity.ok(ApiResponse.success(lessonService.getLessonById(lessonId)));
+    }
+
+    @DeleteMapping("/{courseId}/lessons/{lessonId}")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    public ResponseEntity<ApiResponse<Void>> deleteLesson(@PathVariable String courseId, @PathVariable String lessonId) {
+        lessonService.deleteLesson(lessonId, courseId);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteCourse(@PathVariable String id) {
         courseService.deleteCourse(id);
