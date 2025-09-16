@@ -1,6 +1,7 @@
 package com.dev.quikkkk.user_service.service;
 
 import com.dev.quikkkk.user_service.dto.request.CreateUserRequest;
+import com.dev.quikkkk.user_service.dto.request.UpdateRoleRequest;
 import com.dev.quikkkk.user_service.dto.request.UpdateUserRequest;
 import com.dev.quikkkk.user_service.dto.response.UserResponse;
 
@@ -15,6 +16,8 @@ public interface IUserService {
     List<UserResponse> getUsersByRole(String role);
 
     UserResponse updateUser(String id, UpdateUserRequest request);
+
+    void updateUserRole(String userId, UpdateRoleRequest request);
 
     void deleteUser(String id);
 

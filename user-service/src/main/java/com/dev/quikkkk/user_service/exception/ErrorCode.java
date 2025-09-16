@@ -12,7 +12,8 @@ public enum ErrorCode {
     FORBIDDEN("FORBIDDEN", "Forbidden", HttpStatus.FORBIDDEN),
     UNAUTHORIZED("UNAUTHORIZED", "Unauthorized", HttpStatus.UNAUTHORIZED),
     INVALID_BIO_VALUE("INVALID_BIO_VALUE", "Bio must be male or family", HttpStatus.BAD_REQUEST),
-    INVALID_JWT_TOKEN("INVALID_JWT_TOKEN", "Invalid JWT token", HttpStatus.UNAUTHORIZED);
+    INVALID_JWT_TOKEN("INVALID_JWT_TOKEN", "Invalid JWT token", HttpStatus.UNAUTHORIZED),
+    INVALID_ROLE("INVALID_ROLE", "Invalid role" , HttpStatus.BAD_REQUEST);
 
     private final String code;
     private final String defaultMessage;

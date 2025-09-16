@@ -1,15 +1,18 @@
 package com.dev.quikkkk.user_service.controller;
 
 import com.dev.quikkkk.user_service.dto.request.CreateUserRequest;
+import com.dev.quikkkk.user_service.dto.request.UpdateRoleRequest;
 import com.dev.quikkkk.user_service.dto.response.ApiResponse;
 import com.dev.quikkkk.user_service.dto.response.UserResponse;
 import com.dev.quikkkk.user_service.service.IUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,6 +35,13 @@ public class InternalUserController {
     public ApiResponse<UserResponse> getUserById(@PathVariable String id) {
         log.info("Internal request to get user by id: {}", id);
         return ApiResponse.success(service.getUserById(id));
+    }
+
+    @PutMapping("/{userId}/role")
+    public ResponseEntity<Void> updateUserRole(@PathVariable String userId, @RequestBody UpdateRoleRequest request) {
+        log.info("Internal request to update user role: {}", request);
+        service.updateUserRole(userId, request);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")

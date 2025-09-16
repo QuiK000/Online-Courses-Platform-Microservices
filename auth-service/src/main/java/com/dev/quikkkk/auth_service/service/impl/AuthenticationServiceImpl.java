@@ -195,6 +195,13 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 request.getRole(),
                 userId
         );
+
+        try {
+            userServiceClient.updateUserRole(userId, request);
+            log.info("User role updated in User Service");
+        } catch (Exception e) {
+            log.warn("Failed to update user role in User Service: {}", e.getMessage());
+        }
     }
 
     @Override
