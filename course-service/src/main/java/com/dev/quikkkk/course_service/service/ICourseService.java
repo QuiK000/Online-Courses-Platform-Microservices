@@ -3,6 +3,7 @@ package com.dev.quikkkk.course_service.service;
 import com.dev.quikkkk.course_service.dto.request.CreateCourseRequest;
 import com.dev.quikkkk.course_service.dto.request.UpdateCourseRequest;
 import com.dev.quikkkk.course_service.dto.response.CourseResponse;
+import com.dev.quikkkk.course_service.dto.response.CoursesAndLessonsResponse;
 
 import java.util.List;
 
@@ -11,7 +12,7 @@ public interface ICourseService {
 
     List<CourseResponse> getAllCourses();
 
-    // TODO: Implement details course and lessons
+    CoursesAndLessonsResponse getCourseWithLessons(String id);
 
     CourseResponse updateCourse(String id, UpdateCourseRequest request);
 

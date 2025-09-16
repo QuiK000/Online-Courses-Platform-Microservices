@@ -7,6 +7,7 @@ import com.dev.quikkkk.course_service.mapper.LessonMapper;
 import com.dev.quikkkk.course_service.repository.ICourseRepository;
 import com.dev.quikkkk.course_service.repository.ILessonRepository;
 import com.dev.quikkkk.course_service.service.ILessonService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ public class LessonServiceImpl implements ILessonService {
     private final LessonMapper mapper;
 
     @Override
+    @Transactional
     public LessonResponse saveLesson(String courseId, CreateLessonRequest request) {
         Integer maxOrder = lessonRepository.findMaxOrderByCourseId(courseId);
         int newOrder = (maxOrder == null ? 1 : maxOrder + 1);

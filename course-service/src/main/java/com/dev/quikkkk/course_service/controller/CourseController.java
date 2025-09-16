@@ -4,6 +4,7 @@ import com.dev.quikkkk.course_service.dto.request.CreateCourseRequest;
 import com.dev.quikkkk.course_service.dto.request.CreateLessonRequest;
 import com.dev.quikkkk.course_service.dto.response.ApiResponse;
 import com.dev.quikkkk.course_service.dto.response.CourseResponse;
+import com.dev.quikkkk.course_service.dto.response.CoursesAndLessonsResponse;
 import com.dev.quikkkk.course_service.dto.response.LessonResponse;
 import com.dev.quikkkk.course_service.security.UserPrincipal;
 import com.dev.quikkkk.course_service.service.ICourseService;
@@ -53,6 +54,13 @@ public class CourseController {
     @GetMapping
     public ResponseEntity<ApiResponse<List<CourseResponse>>> getAllCourses() {
         return ResponseEntity.ok(ApiResponse.success(courseService.getAllCourses()));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<CoursesAndLessonsResponse>> getCourseWithLessons(
+            @PathVariable String id
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(courseService.getCourseWithLessons(id)));
     }
 
     @DeleteMapping("/{id}")
