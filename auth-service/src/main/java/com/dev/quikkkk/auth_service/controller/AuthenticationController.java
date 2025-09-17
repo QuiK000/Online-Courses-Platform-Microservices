@@ -9,6 +9,7 @@ import com.dev.quikkkk.auth_service.dto.response.AuthenticationResponse;
 import com.dev.quikkkk.auth_service.dto.response.UserResponse;
 import com.dev.quikkkk.auth_service.security.UserPrincipal;
 import com.dev.quikkkk.auth_service.service.IAuthenticationService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +43,19 @@ public class AuthenticationController {
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<AuthenticationResponse>> refreshToken(@RequestBody RefreshTokenRequest request) {
         return ResponseEntity.ok(ApiResponse.success(service.refreshToken(request)));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer "))
+            return ResponseEntity.badRequest().body(ApiResponse.error("Authorization header is missing or invalid"));
+
+        String token = authHeader.substring(7);
+        service.logout(token);
+
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     @GetMapping("/me")

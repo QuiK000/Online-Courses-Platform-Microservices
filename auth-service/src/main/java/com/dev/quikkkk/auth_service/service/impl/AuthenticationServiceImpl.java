@@ -17,6 +17,7 @@ import com.dev.quikkkk.auth_service.repository.IUserCredentialsRepository;
 import com.dev.quikkkk.auth_service.service.IAuthenticationService;
 import com.dev.quikkkk.auth_service.service.IBruteForceProtectionService;
 import com.dev.quikkkk.auth_service.service.IJwtService;
+import com.dev.quikkkk.auth_service.service.ITokenBlackListService;
 import com.dev.quikkkk.auth_service.utils.NetworkUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -49,6 +50,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     private final IJwtService jwtService;
     private final IUserCredentialsRepository userRepository;
     private final IBruteForceProtectionService bruteForceProtectionService;
+    private final ITokenBlackListService tokenBlackListService;
     private final IUserServiceClient userServiceClient;
     private final IRoleRepository roleRepository;
     private final UserMapper mapper;
@@ -107,6 +109,16 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 .refreshToken(request.getRefreshToken())
                 .tokenType(TOKEN_TYPE)
                 .build();
+    }
+
+    @Override
+    public void logout(String token) {
+        log.info("Logging out user with token: {}", token);
+
+        String actualToken = token.startsWith(TOKEN_TYPE) ? token.substring(TOKEN_TYPE.length()).trim() : token;
+        tokenBlackListService.blacklistToken(actualToken);
+
+        log.info("User logged out successfully");
     }
 
     @Override

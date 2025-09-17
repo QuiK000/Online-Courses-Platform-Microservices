@@ -28,7 +28,11 @@ public class RedisConfig {
     @Bean
     public RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
         return builder -> builder
-                .withCacheConfiguration("users", redisCacheConfiguration());
+                .withCacheConfiguration("users", redisCacheConfiguration())
+                .withCacheConfiguration("blacklisted_tokens",
+                        RedisCacheConfiguration.defaultCacheConfig()
+                                .entryTtl(Duration.ofHours(24))
+                                .disableCachingNullValues());
     }
 
     @Bean

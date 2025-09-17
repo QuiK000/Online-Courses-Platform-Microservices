@@ -12,6 +12,8 @@ public interface IAuthenticationService {
 
     AuthenticationResponse refreshToken(RefreshTokenRequest request);
 
+    void logout(String token);
+
     void register(RegistrationRequest request);
 
     UserResponse getUserById(String id);
