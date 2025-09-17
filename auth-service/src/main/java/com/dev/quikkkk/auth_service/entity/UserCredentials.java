@@ -8,7 +8,12 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
@@ -36,7 +41,17 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "user_credentials")
+@Table(name = "user_credentials", indexes = {
+        @Index(name = "idx_username", columnList = "username"),
+        @Index(name = "idx_email", columnList = "email"),
+        @Index(name = "idx_created_date", columnList = "created_date")
+})
+@NamedQueries({
+        @NamedQuery(
+                name = "UserCredentials.findByUsernameWithRoles",
+                query = "SELECT u FROM UserCredentials u LEFT JOIN FETCH u.roles WHERE LOWER(u.username) = LOWER(:username)"
+        )
+})
 @EntityListeners(AuditingEntityListener.class)
 public class UserCredentials implements UserDetails {
     @Id
@@ -85,7 +100,12 @@ public class UserCredentials implements UserDetails {
                     CascadeType.PERSIST,
                     CascadeType.MERGE
             },
-            fetch = FetchType.LAZY
+            fetch = FetchType.EAGER
+    )
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
 

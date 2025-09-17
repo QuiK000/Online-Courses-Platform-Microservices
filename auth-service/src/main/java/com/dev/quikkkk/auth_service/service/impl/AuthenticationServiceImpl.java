@@ -23,6 +23,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import static com.dev.quikkkk.auth_service.exception.ErrorCode.EMAIL_ALREADY_EXISTS;
 import static com.dev.quikkkk.auth_service.exception.ErrorCode.INTERNAL_SERVER_ERROR;
@@ -72,17 +74,23 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
             bruteForceProtectionService.registerSuccessfulAttempt(clientIp);
 
-            UserCredentials userCredentials = userRepository
-                    .findByUsernameIgnoreCase(request.getUsername())
-                    .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+            UserCredentials userCredentials = findUserByUsername(request.getUsername());
 
-            String token = jwtService.generateAccessToken(userCredentials);
-            String refreshToken = jwtService.generateRefreshToken(userCredentials);
+            CompletableFuture<String> accessTokenFuture = CompletableFuture.supplyAsync(
+                    () -> jwtService.generateAccessToken(userCredentials)
+            );
 
-            log.info("Login response: {}", token);
+            CompletableFuture<String> refreshTokenFuture = CompletableFuture.supplyAsync(
+                    () -> jwtService.generateRefreshToken(userCredentials)
+            );
+
+            String accessToken = accessTokenFuture.get();
+            String refreshToken = refreshTokenFuture.get();
+
+            log.info("Login response: {}", accessToken);
             return AuthenticationResponse
                     .builder()
-                    .accessToken(token)
+                    .accessToken(accessToken)
                     .refreshToken(refreshToken)
                     .tokenType(TOKEN_TYPE)
                     .build();
@@ -180,7 +188,14 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     }
 
     @Override
+    public UserCredentials findUserByUsername(String username) {
+        return userRepository.findByUsernameIgnoreCase(username)
+                .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+    }
+
+    @Override
     @Transactional
+    @CacheEvict(value = "users", key = "#userId")
     public void updateUserRole(String userId, UpdateRoleRequest request) {
         log.info("Updating user role for user with id: {} to role: {}", userId, request.getRole());
 

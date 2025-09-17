@@ -4,9 +4,12 @@ import com.dev.quikkkk.auth_service.entity.Role;
 import com.dev.quikkkk.auth_service.entity.UserCredentials;
 import com.dev.quikkkk.auth_service.service.IJwtService;
 import com.dev.quikkkk.auth_service.utils.KeyUtils;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +18,7 @@ import java.security.PublicKey;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class JwtServiceImpl implements IJwtService {
@@ -23,19 +27,28 @@ public class JwtServiceImpl implements IJwtService {
     private static final String PATH_TO_PRIVATE_KEY = "keys/local-only/private_key.pem";
     private static final String PATH_TO_PUBLIC_KEY = "keys/local-only/public_key.pem";
 
-    private final PrivateKey privateKey;
-    private final PublicKey publicKey;
+    private static final PrivateKey PRIVATE_KEY;
+    private static final PublicKey PUBLIC_KEY;
+
+    private final Cache<@NonNull String, Claims> claimsCache = Caffeine.newBuilder()
+            .maximumSize(10000)
+            .expireAfterWrite(5, TimeUnit.MINUTES)
+            .build();
+
+    static {
+        try {
+            PRIVATE_KEY = KeyUtils.loadPrivateKey(PATH_TO_PRIVATE_KEY);
+            PUBLIC_KEY = KeyUtils.loadPublicKey(PATH_TO_PUBLIC_KEY);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load JWT Keys", e);
+        }
+    }
 
     @Value("${app.security.jwt.access-token-expiration}")
     private long accessTokenExpiration;
 
     @Value("${app.security.jwt.refresh-token-expiration}")
     private long refreshTokenExpiration;
-
-    public JwtServiceImpl() throws Exception {
-        this.privateKey = KeyUtils.loadPrivateKey(PATH_TO_PRIVATE_KEY);
-        this.publicKey = KeyUtils.loadPublicKey(PATH_TO_PUBLIC_KEY);
-    }
 
     @Override
     public String generateAccessToken(UserCredentials userCredentials) {
@@ -79,18 +92,18 @@ public class JwtServiceImpl implements IJwtService {
 
     @Override
     public String extractUsername(String token) {
-        return extractClaims(token).getSubject();
+        return getCachedClaims(token).getSubject();
     }
 
     @Override
     public String extractUserId(String token) {
-        return extractClaims(token).get(USER_ID).toString();
+        return getCachedClaims(token).get(USER_ID).toString();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public List<String> extractRoles(String token) {
-        return (List<String>) extractClaims(token).get("roles");
+        return (List<String>) getCachedClaims(token).get("roles");
     }
 
     @Override
@@ -106,7 +119,7 @@ public class JwtServiceImpl implements IJwtService {
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(privateKey)
+                .signWith(PRIVATE_KEY)
                 .compact();
     }
 
@@ -114,7 +127,7 @@ public class JwtServiceImpl implements IJwtService {
         try {
             return Jwts
                     .parser()
-                    .verifyWith(publicKey)
+                    .verifyWith(PUBLIC_KEY)
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
@@ -127,5 +140,22 @@ public class JwtServiceImpl implements IJwtService {
         return extractClaims(token)
                 .getExpiration()
                 .before(new Date());
+    }
+
+    private Claims getCachedClaims(String token) {
+        return claimsCache.get(token, this::extractClaimsInternal);
+    }
+
+    private Claims extractClaimsInternal(String token) {
+        try {
+            return Jwts
+                    .parser()
+                    .verifyWith(PUBLIC_KEY)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        } catch (JwtException e) {
+            throw new RuntimeException("Invalid JWT token", e);
+        }
     }
 }

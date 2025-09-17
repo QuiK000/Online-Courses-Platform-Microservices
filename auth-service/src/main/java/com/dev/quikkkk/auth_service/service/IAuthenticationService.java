@@ -6,6 +6,7 @@ import com.dev.quikkkk.auth_service.dto.request.RegistrationRequest;
 import com.dev.quikkkk.auth_service.dto.request.UpdateRoleRequest;
 import com.dev.quikkkk.auth_service.dto.response.AuthenticationResponse;
 import com.dev.quikkkk.auth_service.dto.response.UserResponse;
+import com.dev.quikkkk.auth_service.entity.UserCredentials;
 
 public interface IAuthenticationService {
     AuthenticationResponse login(LoginRequest request);
@@ -17,6 +18,8 @@ public interface IAuthenticationService {
     void register(RegistrationRequest request);
 
     UserResponse getUserById(String id);
+
+    UserCredentials findUserByUsername(String username);
 
     void updateUserRole(String userId, UpdateRoleRequest request);
 
