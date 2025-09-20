@@ -40,18 +40,14 @@ services:
       - network
   mongodb:
     image: mongo:latest
-    container_name: course-mongodb
-    restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: root
-      MONGO_INITDB_DATABASE: course_db
+    container_name: mongo_db
     ports:
-      - "27017:27017"
+      - 27017:27017
     volumes:
-      - mongodb_data:/data/db
-    networks:
-      - network
+      - mongo:/data
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
   mongo-express:
     image: mongo-express:latest
     container_name: course-mongo-express
@@ -115,8 +111,7 @@ volumes:
   pgdata:
   redis-insight-data:
   pgadmin:
-  mongodb_data:
-    driver: local
+  mongo:
 
 networks:
   network:
