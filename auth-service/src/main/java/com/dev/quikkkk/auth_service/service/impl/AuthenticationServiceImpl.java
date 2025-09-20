@@ -16,6 +16,7 @@ import com.dev.quikkkk.auth_service.repository.IRoleRepository;
 import com.dev.quikkkk.auth_service.repository.IUserCredentialsRepository;
 import com.dev.quikkkk.auth_service.service.IAuthenticationService;
 import com.dev.quikkkk.auth_service.service.IBruteForceProtectionService;
+import com.dev.quikkkk.auth_service.service.IEmailVerificationService;
 import com.dev.quikkkk.auth_service.service.IJwtService;
 import com.dev.quikkkk.auth_service.service.ITokenBlackListService;
 import com.dev.quikkkk.auth_service.utils.NetworkUtils;
@@ -56,6 +57,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     private final IUserServiceClient userServiceClient;
     private final IRoleRepository roleRepository;
     private final UserMapper mapper;
+    private final IEmailVerificationService emailVerificationService;
 
     @Override
     public AuthenticationResponse login(LoginRequest request) {
@@ -145,11 +147,22 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         roles.add(defaultRole);
 
         UserCredentials userCredentials = mapper.toUser(request);
+
         userCredentials.setRoles(roles);
+        userCredentials.setEnabled(false);
+        userCredentials.setEmailVerified(false);
 
         log.debug("Saving user: {}", userCredentials);
         userRepository.save(userCredentials);
         log.info("User {} registered", userCredentials.getUsername());
+
+        String ipAddress = NetworkUtils.getClientIp().orElseThrow(() -> new BusinessException(INTERNAL_SERVER_ERROR));
+
+        emailVerificationService.sendVerificationCode(
+                userCredentials.getId(),
+                userCredentials.getEmail(),
+                ipAddress
+        );
 
         defaultRole.getUserCredentials().add(userCredentials);
         roleRepository.save(defaultRole);
