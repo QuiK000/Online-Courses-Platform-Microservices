@@ -52,7 +52,7 @@ public class EmailVerification extends BaseEntity {
         return LocalDateTime.now().isAfter(this.expiresAt);
     }
 
-    public void incrementAttemptCount() {
+    public void incrementAttempts() {
         this.attemptCount++;
     }
 
