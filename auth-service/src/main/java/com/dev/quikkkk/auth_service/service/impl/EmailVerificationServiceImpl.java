@@ -56,6 +56,7 @@ public class EmailVerificationServiceImpl implements IEmailVerificationService {
                 .code(code)
                 .expiresAt(LocalDateTime.now().plusMinutes(CODE_EXPIRY_MINUTES))
                 .ipAddress(ipAddress)
+                .createdBy("SYSTEM")
                 .build();
 
         verificationRepository.save(verification);
