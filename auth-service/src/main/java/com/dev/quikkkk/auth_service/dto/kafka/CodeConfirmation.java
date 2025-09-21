@@ -20,10 +20,10 @@ public class CodeConfirmation {
     private String templateType;
     private Map<String, Object> templateVariables;
 
-    public CodeConfirmation(String code, String email, String userId) {
-        this.code = code;
-        this.email = email;
+    public CodeConfirmation(String userId, String email, String code) {
         this.userId = userId;
+        this.email = email;
+        this.code = code;
         this.templateType = "EMAIL_VERIFICATION";
     }
 }
