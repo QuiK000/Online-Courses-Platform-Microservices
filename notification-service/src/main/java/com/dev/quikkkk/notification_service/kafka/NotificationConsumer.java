@@ -28,9 +28,9 @@ public class NotificationConsumer {
             repository.save(
                     Notification.builder()
                             .type(SEND_EMAIL_VERIFICATION)
-                            .email(notification.email())
-                            .code(notification.code())
                             .userId(notification.userId())
+                            .code(notification.code())
+                            .email(notification.email())
                             .notificationDate(LocalDateTime.now())
                             .build()
             );

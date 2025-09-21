@@ -1,8 +1,8 @@
 package com.dev.quikkkk.notification_service.dto;
 
 public record CodeConfirmation(
-        String code,
+        String userId,
         String email,
-        String userId
+        String code
 ) {
 }
