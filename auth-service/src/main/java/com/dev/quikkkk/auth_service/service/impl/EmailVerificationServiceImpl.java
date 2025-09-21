@@ -136,19 +136,33 @@ public class EmailVerificationServiceImpl implements IEmailVerificationService {
 
     private boolean canSendEmail(String email) {
         String key = RATE_LIMIT_KEY_PREFIX + email;
-        String countStr = (String) redisTemplate.opsForValue().get(key);
+        Object countObj = redisTemplate.opsForValue().get(key);
 
-        if (countStr == null) return true;
-        int count = Integer.parseInt(countStr);
+        if (countObj == null) return true;
+        try {
+            int count;
+            switch (countObj) {
+                case Integer i -> count = i;
+                case String s -> count = Integer.parseInt(s);
+                case Long l -> count = l.intValue();
+                default -> {
+                    log.warn("Unexpected type of count object: {}", countObj.getClass().getName());
+                    return true;
+                }
+            }
 
-        return count < MAX_SENDS_PER_HOUR;
+            return count < MAX_SENDS_PER_HOUR;
+        } catch (NumberFormatException e) {
+            log.warn("Invalid count value in Redis: {}", countObj);
+            return true;
+        }
     }
 
     private void incrementEmailRateLimit(String email) {
         String key = RATE_LIMIT_KEY_PREFIX + email;
-        Long count = redisTemplate.opsForValue().increment(key);
+        Long count = redisTemplate.opsForValue().increment(key, 1L);
 
-        if (count == 1) {
+        if (count != null && count == 1) {
             redisTemplate.expire(key, 1, TimeUnit.HOURS);
         }
     }
