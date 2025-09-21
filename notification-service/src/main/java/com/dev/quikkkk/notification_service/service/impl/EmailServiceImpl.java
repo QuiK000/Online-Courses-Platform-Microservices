@@ -30,19 +30,12 @@ public class EmailServiceImpl implements IEmailService {
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
 
-    private final static Integer MAX_ATTEMPTS = 3;
-    private final static Integer SLEEP_TIME = 2000;
-    private final static Integer MULTIPLIER = 2;
-
     @Value("${spring.mail.from:noreply@quikkkk.dev}")
     private String fromEmail;
 
     @Override
     @Async
-    @Retryable(
-            maxAttempts = MAX_ATTEMPTS,
-            backoff = @Backoff(delay = SLEEP_TIME, multiplier = MULTIPLIER)
-    )
+    @Retryable(backoff = @Backoff(delay = 2000, multiplier = 2))
     public void sendCodeSuccessEmail(String destinationEmail, String code) throws MessagingException {
         log.info("Sending code confirmation email to {}", destinationEmail);
 
