@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: progress-service
+  data:
+    redis:
+      host: localhost
+      port: 6380
+      database: 0
+    mongodb:
+      username: root
+      password: root
+      host: localhost
+      port: 27017
+      database: progress_db
+      authentication-database: admin
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+server:
+  port: 8020
