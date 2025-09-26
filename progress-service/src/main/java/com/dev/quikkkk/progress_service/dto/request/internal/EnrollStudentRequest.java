@@ -1,4 +1,4 @@
-package com.dev.quikkkk.user_service.dto.request.internal;
+package com.dev.quikkkk.progress_service.dto.request.internal;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
