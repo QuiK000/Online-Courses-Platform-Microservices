@@ -1,6 +1,6 @@
 package com.dev.quikkkk.progress_service.document;
 
-import com.dev.quikkkk.progress_service.dto.response.LessonResponse;
+import com.dev.quikkkk.progress_service.enums.CourseStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,13 +24,25 @@ import java.util.List;
 public class Progress {
     @Id
     private String id;
+
     private String studentId;
+    private String studentName;
+
     private String courseId;
-    private List<LessonResponse> lessons = new ArrayList<>();
+    private String courseName;
+    private String teacherId;
+    private String courseImageUrl;
+
+    private List<LessonProgress> lessons = new ArrayList<>();
+    private ProgressStats stats;
+    private CourseStatus courseStatus;
 
     @CreatedDate
-    private LocalDateTime createdAt;
+    private LocalDateTime enrolledAt;
 
     @LastModifiedDate
-    private LocalDateTime updatedAt;
+    private LocalDateTime lastActivityAt;
+    private LocalDateTime completedAt;
+
+    private Integer version;
 }
