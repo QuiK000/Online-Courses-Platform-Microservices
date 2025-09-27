@@ -21,8 +21,10 @@ public class ProgressServiceImpl implements IProgressService {
 
     @Override
     public ProgressResponse createProgress(EnrollStudentRequest request) {
-        var progress = mapper.toProgress(request);
-        return null;
+        var progressResponse = mapper.toProgressResponse(request);
+        repository.save(mapper.toProgress(progressResponse));
+
+        return progressResponse;
     }
 
     @Override
