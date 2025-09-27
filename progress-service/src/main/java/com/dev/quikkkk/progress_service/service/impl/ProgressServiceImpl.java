@@ -3,6 +3,8 @@ package com.dev.quikkkk.progress_service.service.impl;
 import com.dev.quikkkk.progress_service.document.Progress;
 import com.dev.quikkkk.progress_service.dto.request.internal.EnrollStudentRequest;
 import com.dev.quikkkk.progress_service.dto.response.ProgressResponse;
+import com.dev.quikkkk.progress_service.exception.BusinessException;
+import com.dev.quikkkk.progress_service.exception.ErrorCode;
 import com.dev.quikkkk.progress_service.mapper.ProgressMapper;
 import com.dev.quikkkk.progress_service.repository.IProgressRepository;
 import com.dev.quikkkk.progress_service.service.IProgressService;
@@ -44,16 +46,31 @@ public class ProgressServiceImpl implements IProgressService {
 
     @Override
     public Optional<ProgressResponse> getProgressByStudentAndCourse(String studentId, String courseId) {
-        return Optional.empty();
+        log.info("Getting progress for student: {}, in course: {}", studentId, courseId);
+        return repository.findByStudentIdAndCourseId(studentId, courseId).map(mapper::toProgressResponse);
     }
 
     @Override
     public List<ProgressResponse> getStudentProgress(String studentId) {
-        return List.of();
+        log.info("Getting progress for student: {}", studentId);
+
+        List<Progress> progressList = repository.findByStudentId(studentId);
+        log.debug("Found {} courses for student: {}", progressList.size(), studentId);
+        return progressList.stream()
+                .map(mapper::toProgressResponse)
+                .toList();
     }
 
     @Override
     public void deleteProgress(String progressId) {
+        log.info("Deleting progress with ID: {}", progressId);
 
+        if (repository.existsById(progressId)) {
+            repository.deleteById(progressId);
+            log.info("Deleted progress with ID: {}", progressId);
+        } else {
+            log.warn("Progress not found for deletion: {}", progressId);
+            throw new BusinessException(ErrorCode.PROGRESS_NOT_FOUND, progressId);
+        }
     }
 }
