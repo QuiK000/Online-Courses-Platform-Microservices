@@ -11,7 +11,10 @@ public enum ErrorCode {
     BAD_REQUEST("BAD_REQUEST", "Bad request", HttpStatus.BAD_REQUEST),
     FORBIDDEN("FORBIDDEN", "Forbidden", HttpStatus.FORBIDDEN),
     UNAUTHORIZED("UNAUTHORIZED", "Unauthorized", HttpStatus.UNAUTHORIZED),
-    INVALID_JWT_TOKEN("INVALID_JWT_TOKEN", "Invalid JWT token", HttpStatus.UNAUTHORIZED);
+    INVALID_JWT_TOKEN("INVALID_JWT_TOKEN", "Invalid JWT token", HttpStatus.UNAUTHORIZED),
+    PROGRESS_NOT_FOUND("PROGRESS_NOT_FOUND", "Progress not found with id %s", HttpStatus.NOT_FOUND),
+    PROGRESS_ALREADY_EXISTS("PROGRESS_ALREADY_EXISTS", "Progress already exists", HttpStatus.CONFLICT),
+    LESSON_NOT_FOUND_IN_PROGRESS("LESSON_NOT_FOUND_IN_PROGRESS", "Lesson %s not found in progress", HttpStatus.NOT_FOUND),;
 
     private final String code;
     private final String defaultMessage;
