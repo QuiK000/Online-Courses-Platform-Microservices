@@ -5,9 +5,8 @@ import com.dev.quikkkk.progress_service.service.IJwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import utils.KeyUtils;
+import com.dev.quikkkk.progress_service.utils.KeyUtils;
 
 import java.security.PublicKey;
 import java.util.Date;
@@ -16,7 +15,6 @@ import java.util.List;
 import static com.dev.quikkkk.progress_service.exception.ErrorCode.INVALID_JWT_TOKEN;
 
 @Service
-@RequiredArgsConstructor
 public class JwtServiceImpl implements IJwtService {
     private static final String USER_ID = "userId";
     private static final String PATH_TO_PUBLIC_KEY = "keys/local-only/public_key.pem";

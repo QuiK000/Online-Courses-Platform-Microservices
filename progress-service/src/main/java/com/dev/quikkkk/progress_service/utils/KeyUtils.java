@@ -1,4 +1,4 @@
-package utils;
+package com.dev.quikkkk.progress_service.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
