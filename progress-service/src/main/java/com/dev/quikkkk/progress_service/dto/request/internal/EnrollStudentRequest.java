@@ -19,7 +19,6 @@ public class EnrollStudentRequest {
     private String studentId;
     @NotNull(message = "VALIDATION.ENROLL.STUDENT.STUDENT.NAME.NOT_NULL")
     private String courseId;
-    @NotNull(message = "VALIDATION.ENROLL.STUDENT.COURSE.NAME.NOT_NULL")
     private String teacherId;
     private List<LessonInfo> lessons;
 }
