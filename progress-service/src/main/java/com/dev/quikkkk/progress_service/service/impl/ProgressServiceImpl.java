@@ -1,5 +1,6 @@
 package com.dev.quikkkk.progress_service.service.impl;
 
+import com.dev.quikkkk.progress_service.document.Progress;
 import com.dev.quikkkk.progress_service.dto.request.internal.EnrollStudentRequest;
 import com.dev.quikkkk.progress_service.dto.response.ProgressResponse;
 import com.dev.quikkkk.progress_service.mapper.ProgressMapper;
@@ -21,10 +22,24 @@ public class ProgressServiceImpl implements IProgressService {
 
     @Override
     public ProgressResponse createProgress(EnrollStudentRequest request) {
-        var progressResponse = mapper.toProgressResponse(request);
-        repository.save(mapper.toProgress(progressResponse));
+        log.info("Creating progress for student: {}, in course: {}", request.getStudentId(), request.getCourseId());
+        Optional<Progress> existingProgress = repository
+                .findByStudentIdAndCourseId(request.getStudentId(), request.getCourseId());
 
-        return progressResponse;
+        if (existingProgress.isPresent()) {
+            log.warn("Progress already exists for student: {} in course: {}",
+                    request.getStudentId(), request.getCourseId()
+            );
+
+            return mapper.toProgressResponse(existingProgress.get());
+        }
+
+        var progress = mapper.toProgress(request);
+        var savedProgress = repository.save(progress);
+
+        log.info("Progress created with ID: {} for student: {}", savedProgress.getId(), request.getStudentId());
+
+        return mapper.toProgressResponse(savedProgress);
     }
 
     @Override
