@@ -24,15 +24,9 @@ import java.util.List;
 public class Progress {
     @Id
     private String id;
-
     private String studentId;
-    private String studentName;
-
     private String courseId;
-    private String courseName;
     private String teacherId;
-    private String courseImageUrl;
-
     private List<LessonProgress> lessons = new ArrayList<>();
     private ProgressStats stats;
     private CourseStatus courseStatus;

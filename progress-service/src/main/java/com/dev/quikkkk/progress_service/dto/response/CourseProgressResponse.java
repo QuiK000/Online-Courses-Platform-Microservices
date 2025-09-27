@@ -18,9 +18,7 @@ import java.util.List;
 @Setter
 public class CourseProgressResponse {
     private String courseId;
-    private String courseName;
     private String teacherId;
-    private String courseImageUrl;
 
     private CourseStatus courseStatus;
     private ProgressStats stats;

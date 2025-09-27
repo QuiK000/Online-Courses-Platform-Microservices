@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 @Setter
 public class LessonProgressResponse {
     private String lessonId;
-    private String lessonTitle;
     private Integer lessonOrder;
     private LessonStatus status;
 

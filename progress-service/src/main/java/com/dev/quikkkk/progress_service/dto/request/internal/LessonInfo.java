@@ -16,7 +16,5 @@ public class LessonInfo {
     @NotNull(message = "VALIDATION.LESSON.INFO.LESSON.ID.NOT_NULL")
     private String lessonId;
     @NotNull(message = "VALIDATION.LESSON.INFO.LESSON.TITLE.NOT_NULL")
-    private String lessonTitle;
-    @NotNull(message = "VALIDATION.LESSON.INFO.LESSON.ORDER.NOT_NULL")
     private Integer lessonOrder;
 }

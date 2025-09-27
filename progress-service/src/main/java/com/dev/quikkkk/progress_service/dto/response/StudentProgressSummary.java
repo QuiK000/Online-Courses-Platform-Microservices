@@ -16,8 +16,6 @@ import java.time.LocalDateTime;
 @Setter
 public class StudentProgressSummary {
     private String courseId;
-    private String courseName;
-    private String courseImageUrl;
     private CourseStatus courseStatus;
     private Double completionPercentage;
     private Integer totalLessons;
