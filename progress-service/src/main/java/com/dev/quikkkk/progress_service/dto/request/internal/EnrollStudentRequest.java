@@ -21,6 +21,5 @@ public class EnrollStudentRequest {
     private String courseId;
     @NotNull(message = "VALIDATION.ENROLL.STUDENT.COURSE.NAME.NOT_NULL")
     private String teacherId;
-    private String courseImageUrl;
     private List<LessonInfo> lessons;
 }
