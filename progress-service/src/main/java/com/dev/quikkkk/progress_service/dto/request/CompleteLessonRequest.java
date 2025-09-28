@@ -20,10 +20,10 @@ import java.time.LocalDateTime;
 public class CompleteLessonRequest {
     @NotNull(message = "VALIDATION.COMPLETE.LESSON.COURSE.ID.NOT_BLANK")
     private String courseId;
-    @Min(0)
+    @Min(value = 0, message = "VALIDATION.COMPLETE.LESSON.TIME.SPENT.CANNOT.BE.NEGATIVE")
     private Integer timeSpentMinutes;
     @DecimalMin("0.0") @DecimalMax("100.0")
     private Double watchPercentage;
     private String notes;
-    private LocalDateTime completedTime;
+    private LocalDateTime completedTime = LocalDateTime.now();
 }
