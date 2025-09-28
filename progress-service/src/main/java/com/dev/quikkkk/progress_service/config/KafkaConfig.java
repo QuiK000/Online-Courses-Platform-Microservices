@@ -26,11 +26,10 @@ public class KafkaConfig {
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
 
         config.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
-        config.put(
-                JsonDeserializer.TYPE_MAPPINGS,
+        config.put(JsonDeserializer.TYPE_MAPPINGS,
                 "studentEnrolledEvent:com.dev.quikkkk.progress_service.dto.kafka.StudentEnrolledEvent," +
-                        "com.dev.quikkkk.course_service.dto.kafka.StudentEnrolledEvent:com.dev.quikkkk.progress_service.dto.kafka.StudentEnrolledEvent"
-        );
+                        "progressMilestoneEvent:com.dev.quikkkk.progress_service.dto.kafka.ProgressMilestoneEvent," +
+                        "lessonCompletedEvent:com.dev.quikkkk.progress_service.dto.kafka.LessonCompletedEvent");
 
         return new DefaultKafkaConsumerFactory<>(config);
     }

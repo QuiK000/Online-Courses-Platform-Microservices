@@ -4,6 +4,7 @@ import com.dev.quikkkk.progress_service.document.Progress;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -27,4 +28,9 @@ public interface IProgressRepository extends MongoRepository<Progress, String> {
     void deleteByLastActivityAtBefore(LocalDateTime cutoffDate);
 
     List<Progress> findByLastActivityAtBefore(LocalDateTime cutoffDate);
+
+    List<Progress> findByLastActivityAtAfter(LocalDateTime dateTime);
+
+    @Query("{ 'lastActivityAt' : { $lt: ?0 }, 'courseStatus' : { $ne: 'COMPLETED' } }")
+    List<Progress> findInactiveStudents(LocalDateTime dateTime);
 }
