@@ -26,7 +26,10 @@ spring:
             trusted:
               packages: '*'
             type:
-              mapping: 'studentEnrolledEvent:com.dev.quikkkk.progress_service.dto.kafka.StudentEnrolledEvent'
+              mapping: |
+                com.dev.quikkkk.course_service.dto.kafka.StudentEnrolledEvent:com.dev.quikkkk.progress_service.dto.kafka.StudentEnrolledEvent,
+                progressMilestoneEvent:com.dev.quikkkk.progress_service.dto.kafka.ProgressMilestoneEvent,
+                lessonCompletedEvent:com.dev.quikkkk.progress_service.dto.kafka.LessonCompletedEvent
 
 eureka:
   instance:
