@@ -4,6 +4,7 @@ import com.dev.quikkkk.progress_service.client.IUserServiceClient;
 import com.dev.quikkkk.progress_service.document.LessonProgress;
 import com.dev.quikkkk.progress_service.document.Progress;
 import com.dev.quikkkk.progress_service.dto.kafka.LessonCompletedEvent;
+import com.dev.quikkkk.progress_service.dto.kafka.ProgressMilestoneEvent;
 import com.dev.quikkkk.progress_service.dto.request.CompleteLessonRequest;
 import com.dev.quikkkk.progress_service.dto.request.internal.EnrollStudentRequest;
 import com.dev.quikkkk.progress_service.dto.response.CourseProgressResponse;
@@ -116,6 +117,9 @@ public class ProgressServiceImpl implements IProgressService {
         Progress savedProgress = repository.save(progress);
 
         sendLessonCompletedEvent(savedProgress, lessonProgress);
+        checkAndSendMilestoneEvents(savedProgress);
+
+        log.info("Lesson {} completed successfully for student {}", lessonId, studentId);
     }
 
     @Override
@@ -191,6 +195,45 @@ public class ProgressServiceImpl implements IProgressService {
             log.info("Lesson completed event sent for student {}", progress.getStudentId());
         } catch (Exception e) {
             log.error("Failed to send lesson completed event: {}", e.getMessage());
+        }
+    }
+
+    private void checkAndSendMilestoneEvents(Progress progress) {
+        Double completionPercentage = progress.getStats().getCompletionPercentage();
+        List<Double> milestones = List.of(25.0, 50.0, 75.0, 100.0);
+
+        for (Double milestone : milestones) {
+            String milestoneKey = milestone == 100.0 ? "COMPLETED" : String.format("%.0f%%", milestone);
+
+            if (completionPercentage >= milestone && !progress.getSentMilestones().contains(milestoneKey)) {
+                sendMilestoneEvent(progress, milestone, milestoneKey);
+                progress.getSentMilestones().add(milestoneKey);
+                repository.save(progress); // Update sent milestones
+            }
+        }
+    }
+
+    private void sendMilestoneEvent(Progress progress, Double milestone, String milestoneKey) {
+        try {
+            UserInfo userInfo = getUserInfo(progress.getStudentId());
+
+            ProgressMilestoneEvent event = ProgressMilestoneEvent.builder()
+                    .studentId(progress.getStudentId())
+                    .studentEmail(userInfo.getEmail())
+                    .studentName(userInfo.getFirstName() + " " + userInfo.getLastName())
+                    .courseId(progress.getCourseId())
+                    .courseName("Learning Course") // TODO: Get from course service
+                    .completionPercentage(milestone)
+                    .milestone(milestoneKey)
+                    .completedLessons(progress.getStats().getCompletedLessons())
+                    .totalLessons(progress.getStats().getTotalLessons())
+                    .achievedAt(LocalDateTime.now())
+                    .build();
+
+            kafkaTemplate.send("progress-milestone-topic", event);
+            log.info("Milestone {}% event sent for student {}", milestone,  progress.getStudentId());
+        } catch (Exception e) {
+            log.error("Failed to sent milestone event: {}", e.getMessage());
         }
     }
 
