@@ -8,6 +8,7 @@ import com.dev.quikkkk.progress_service.dto.request.internal.EnrollStudentReques
 import com.dev.quikkkk.progress_service.dto.response.CourseProgressResponse;
 import com.dev.quikkkk.progress_service.dto.response.LessonProgressResponse;
 import com.dev.quikkkk.progress_service.dto.response.ProgressResponse;
+import com.dev.quikkkk.progress_service.dto.response.StudentProgressSummary;
 import com.dev.quikkkk.progress_service.enums.CourseStatus;
 import com.dev.quikkkk.progress_service.enums.LessonStatus;
 import org.springframework.stereotype.Service;
@@ -99,6 +100,17 @@ public class ProgressMapper {
                 .averageTimePerLesson(0)
                 .currentStreak(0)
                 .longestStreak(0)
+                .build();
+    }
+
+    public StudentProgressSummary toProgressSummary(Progress progress) {
+        return StudentProgressSummary.builder()
+                .courseId(progress.getCourseId())
+                .courseStatus(progress.getCourseStatus())
+                .completionPercentage(progress.getStats().getCompletionPercentage())
+                .totalLessons(progress.getStats().getTotalLessons())
+                .completedLessons(progress.getStats().getCompletedLessons())
+                .lastActivityAt(progress.getLastActivityAt())
                 .build();
     }
 }

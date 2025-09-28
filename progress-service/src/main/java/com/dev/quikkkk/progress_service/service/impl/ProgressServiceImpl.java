@@ -124,12 +124,17 @@ public class ProgressServiceImpl implements IProgressService {
 
     @Override
     public CourseProgressResponse getCourseProgress(String studentId, String courseId) {
-        return null;
+        Progress progress = repository.findByStudentIdAndCourseId(studentId, courseId)
+                .orElseThrow(() -> new BusinessException(PROGRESS_NOT_FOUND, studentId));
+        return mapper.toCourseProgressResponse(progress);
     }
 
     @Override
     public List<StudentProgressSummary> getStudentProgressSummary(String studentId) {
-        return List.of();
+        List<Progress> progressList = repository.findByStudentId(studentId);
+        return progressList.stream()
+                .map(mapper::toProgressSummary)
+                .toList();
     }
 
     private LessonProgress findLessonProgress(Progress progress, String lessonId) {
