@@ -13,6 +13,20 @@ spring:
       port: 27017
       database: progress_db
       authentication-database: admin
+  kafka:
+    bootstrap-servers: 172.19.94.160:9092
+    consumer:
+      group-id: progress-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: '*'
+            type:
+              mapping: 'studentEnrolledEvent:com.dev.quikkkk.progress_service.dto.kafka.StudentEnrolledEvent'
 
 eureka:
   instance:

@@ -6,11 +6,18 @@ spring:
       host: localhost
       port: 6380
       database: 0
+  kafka:
+    producer:
+      bootstrap-servers: 172.19.94.160:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/course_db
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://aws-1-eu-central-1.pooler.supabase.com:5432/course_db
+    username: postgres.nbctaqdagentcyufrrjk
+    password: tdoHj9KNcKUr1RDr
   jpa:
     hibernate:
       ddl-auto: create-drop
