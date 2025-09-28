@@ -1,5 +1,6 @@
 package com.dev.quikkkk.progress_service.dto.request.internal;
 
+import com.dev.quikkkk.progress_service.dto.kafka.LessonInfo;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
