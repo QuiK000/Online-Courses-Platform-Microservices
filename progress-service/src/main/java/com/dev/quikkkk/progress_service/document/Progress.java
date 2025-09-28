@@ -13,7 +13,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Document(collection = "progress")
 @AllArgsConstructor
@@ -39,4 +41,5 @@ public class Progress {
     private LocalDateTime completedAt;
 
     private Integer version;
+    private Set<String> sentMilestones = new HashSet<>();
 }
