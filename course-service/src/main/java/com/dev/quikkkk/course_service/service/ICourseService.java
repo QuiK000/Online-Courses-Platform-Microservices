@@ -16,5 +16,7 @@ public interface ICourseService {
 
     CourseResponse updateCourse(String id, UpdateCourseRequest request);
 
+    void enrollStudent(String courseId, String studentId);
+
     void deleteCourse(String id);
 }

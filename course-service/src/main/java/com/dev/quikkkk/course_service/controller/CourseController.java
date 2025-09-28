@@ -51,6 +51,16 @@ public class CourseController {
         return ResponseEntity.ok(ApiResponse.success(lessonService.saveLesson(id, request)));
     }
 
+    @PostMapping("/{course-id}/enroll")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public ResponseEntity<ApiResponse<Void>> enrollInCourse(
+            @PathVariable("course-id") String courseId,
+            @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        courseService.enrollStudent(courseId, principal.id());
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
     @GetMapping
     public ResponseEntity<ApiResponse<List<CourseResponse>>> getAllCourses() {
         return ResponseEntity.ok(ApiResponse.success(courseService.getAllCourses()));

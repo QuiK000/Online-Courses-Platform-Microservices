@@ -1,5 +1,7 @@
 package com.dev.quikkkk.course_service.service.impl;
 
+import com.dev.quikkkk.course_service.dto.kafka.LessonInfo;
+import com.dev.quikkkk.course_service.dto.kafka.StudentEnrolledEvent;
 import com.dev.quikkkk.course_service.dto.request.CreateCourseRequest;
 import com.dev.quikkkk.course_service.dto.request.UpdateCourseRequest;
 import com.dev.quikkkk.course_service.dto.response.CourseResponse;
@@ -19,8 +21,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.dev.quikkkk.course_service.exception.ErrorCode.COURSE_NOT_FOUND;
@@ -33,6 +37,7 @@ public class CourseServiceImpl implements ICourseService {
     private final ILessonRepository lessonRepository;
     private final CourseMapper courseMapper;
     private final LessonMapper lessonMapper;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
     @Transactional
@@ -84,6 +89,36 @@ public class CourseServiceImpl implements ICourseService {
     public CourseResponse updateCourse(String id, UpdateCourseRequest request) {
         log.info("Updating course with ID: {}", id);
         return null;
+    }
+
+    @Override
+    @Transactional
+    public void enrollStudent(String courseId, String studentId) {
+        log.info("Enrolling student {} in course {}", studentId, courseId);
+
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new BusinessException(COURSE_NOT_FOUND, courseId));
+
+        List<Lesson> lessons = lessonRepository.findByCourseIdOrderByOrderAsc(courseId);
+        List<LessonInfo> lessonInfos = lessons.stream()
+                .map(lesson -> LessonInfo.builder()
+                        .lessonId(lesson.getId())
+                        .lessonTitle(lesson.getTitle())
+                        .lessonOrder(lesson.getOrder())
+                        .build())
+                .toList();
+
+        StudentEnrolledEvent event = StudentEnrolledEvent.builder()
+                .studentId(studentId)
+                .courseId(courseId)
+                .teacherId(course.getTeacherId())
+                .courseName(course.getTitle())
+                .lessons(lessonInfos)
+                .enrolledAt(LocalDateTime.now())
+                .build();
+
+        kafkaTemplate.send("student-enrolled-topic", event);
+        log.info("Published StudentEnrolledEvent for student {} in course {}", studentId, courseId);
     }
 
     @Override
